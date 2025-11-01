@@ -1,9 +1,20 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="w-full h-screen flex">
-      <h1>T4GC Hackathon</h1>
-    </div>
-  );
+import { useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
+
+export default function Page() {
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    } else {
+      router.push("/auth/login");
+    }
+  }, [isAuthenticated, router]);
+
+  return null;
 }
