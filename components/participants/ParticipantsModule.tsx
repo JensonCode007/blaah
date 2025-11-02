@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,8 +34,29 @@ async function sendNotification(action: string, data: Record<string, any>) {
 }
 
 const mockParticipants = [
-  { id: "1", name: "Alice Smith", age: 20, gender: "Female", team: "Blue Strikers", role: "Player", contact: "alice@example.com", status: "Pending" },
+  { id: "1", name: "Alice Smith", age: 20, gender: "Female", team: "Blue Strikers", role: "Player", contact: "alice@example.com", status: "Approved" },
   { id: "2", name: "Bob Johnson", age: 25, gender: "Male", team: "Red Raptors", role: "Coach", contact: "bob@example.com", status: "Approved" },
+  { id: "3", name: "Charlie Davis", age: 22, gender: "Male", team: "Blue Strikers", role: "Player", contact: "charlie@example.com", status: "Approved" },
+  { id: "4", name: "Diana Ross", age: 24, gender: "Female", team: "Blue Strikers", role: "Player", contact: "diana@example.com", status: "Approved" },
+  { id: "5", name: "Edward Norton", age: 28, gender: "Male", team: "Red Raptors", role: "Player", contact: "edward@example.com", status: "Approved" },
+  { id: "6", name: "Fiona Apple", age: 23, gender: "Female", team: "Red Raptors", role: "Player", contact: "fiona@example.com", status: "Approved" },
+  { id: "7", name: "George Martin", age: 26, gender: "Male", team: "Green Warriors", role: "Coach", contact: "george@example.com", status: "Approved" },
+  { id: "8", name: "Hannah Montana", age: 21, gender: "Female", team: "Green Warriors", role: "Player", contact: "hannah@example.com", status: "Approved" },
+  { id: "9", name: "Ian McKellen", age: 29, gender: "Male", team: "Green Warriors", role: "Player", contact: "ian@example.com", status: "Approved" },
+  { id: "10", name: "Julia Roberts", age: 25, gender: "Female", team: "Yellow Dragons", role: "Player", contact: "julia@example.com", status: "Approved" },
+  { id: "11", name: "Kevin Hart", age: 27, gender: "Male", team: "Yellow Dragons", role: "Player", contact: "kevin@example.com", status: "Approved" },
+  { id: "12", name: "Laura Palmer", age: 22, gender: "Female", team: "Yellow Dragons", role: "Coach", contact: "laura@example.com", status: "Approved" },
+  { id: "13", name: "Michael Scott", age: 30, gender: "Male", team: "Blue Strikers", role: "Volunteer", contact: "michael@example.com", status: "Approved" },
+  { id: "14", name: "Nina Simone", age: 26, gender: "Female", team: "Red Raptors", role: "Volunteer", contact: "nina@example.com", status: "Approved" },
+  { id: "15", name: "Oscar Wilde", age: 24, gender: "Male", team: "Green Warriors", role: "Volunteer", contact: "oscar@example.com", status: "Approved" },
+  { id: "16", name: "Patricia Hill", age: 23, gender: "Female", team: "Purple Knights", role: "Player", contact: "patricia@example.com", status: "Approved" },
+  { id: "17", name: "Quincy Jones", age: 28, gender: "Male", team: "Purple Knights", role: "Player", contact: "quincy@example.com", status: "Approved" },
+  { id: "18", name: "Rachel Green", age: 21, gender: "Female", team: "Purple Knights", role: "Coach", contact: "rachel@example.com", status: "Approved" },
+  { id: "19", name: "Samuel Jackson", age: 27, gender: "Male", team: "Orange Tigers", role: "Player", contact: "samuel@example.com", status: "Approved" },
+  { id: "20", name: "Tina Turner", age: 25, gender: "Female", team: "Orange Tigers", role: "Player", contact: "tina@example.com", status: "Approved" },
+  { id: "21", name: "Uma Thurman", age: 29, gender: "Female", team: "Orange Tigers", role: "Coach", contact: "uma@example.com", status: "Approved" },
+  { id: "22", name: "Victor Hugo", age: 26, gender: "Male", team: "Yellow Dragons", role: "Volunteer", contact: "victor@example.com", status: "Pending" },
+  { id: "23", name: "Wendy Williams", age: 24, gender: "Female", team: "Purple Knights", role: "Volunteer", contact: "wendy@example.com", status: "Pending" },
 ];
 
 export type Participant = {
@@ -59,11 +80,22 @@ const emptyForm: Omit<Participant, "id"> = {
   status: "Pending",
 };
 
-export default function ParticipantsModule() {
+type ParticipantsModuleProps = {
+  onParticipantsChange?: (participants: Participant[]) => void;
+};
+
+export default function ParticipantsModule({ onParticipantsChange }: ParticipantsModuleProps = {}) {
   const [participants, setParticipants] = useState<Participant[]>(mockParticipants);
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState<{ [K in keyof typeof emptyForm]?: boolean }>({});
+
+  // Notify parent component when participants change
+  useEffect(() => {
+    if (onParticipantsChange) {
+      onParticipantsChange(participants);
+    }
+  }, [participants, onParticipantsChange]);
 
   const resetForm = () => { setForm(emptyForm); setErrors({}); };
   const handleOpenChange = (open: boolean) => { setAddOpen(open); if (!open) resetForm(); };

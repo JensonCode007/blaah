@@ -116,6 +116,7 @@ export default function CreateFormPage() {
         formName: formName.trim(),
         formDescription: formDescription.trim(),
         userQuestions: questions.map((q, index) => ({
+          id: 0, // Temporary ID, will be assigned by backend
           questionText: q.questionText || '',
           questionType: q.questionType || 'SHORT_ANSWER',
           required: q.required || false,

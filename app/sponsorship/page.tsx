@@ -151,7 +151,7 @@ export default function SponsorshipPage() {
                 currentAmount: 0,
                 status: 'active',
                 createdAt: new Date().toISOString(),
-                tiers: formData.tiers.map((t, i) => ({ ...t, id: Date.now() + i }))
+                tiers: formData.tiers.map((t: any, i: number) => ({ ...t, id: Date.now() + i }))
               };
               const updatedForms = [...forms, newForm];
               setForms(updatedForms);

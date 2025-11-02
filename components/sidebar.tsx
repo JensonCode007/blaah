@@ -70,6 +70,17 @@ export function Sidebar() {
         >
           Gallery
         </Link>
+        {user?.role === "user" && (
+          <Link 
+            href="/fixtures" 
+            className={cn(
+              "px-3 py-2 rounded-md hover:bg-neutral-100 transition",
+              pathname === "/fixtures" && "bg-neutral-100 font-medium"
+            )}
+          >
+            My Fixtures
+          </Link>
+        )}
         <Link 
           href="/past-tournaments" 
           className={cn(
