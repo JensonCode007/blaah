@@ -15,7 +15,7 @@ function ParticipantsContent() {
   const [activeTab, setActiveTab] = useState<"participants" | "timeline" | "fixtures">(initial);
   const [participants, setParticipants] = useState<any[]>([]);
   
-  const isEventHoster = user?.role === "event-hoster";
+  const isEventHoster = user?.role === "admin";
 
   useEffect(() => {
     const sp = new URLSearchParams(Array.from(searchParams.entries()));

@@ -22,10 +22,22 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Don't show sidebar on auth pages or if not authenticated
-  if (pathname.startsWith("/auth") || !isAuthenticated) {
+  // Don't show sidebar on auth pages, dashboard, or if not authenticated
+  if (pathname.startsWith("/auth") || pathname === "/dashboard" || !isAuthenticated) {
     return null;
   }
+
+  // Determine which section we're in
+  const isTournamentSection = pathname.startsWith("/tournaments") || 
+                               pathname.startsWith("/fixtures") || 
+                               pathname.startsWith("/past-tournaments") ||
+                               pathname.startsWith("/participants") ||
+                               pathname.startsWith("/voting") ||
+                               pathname.startsWith("/forms") ||
+                               pathname.startsWith("/sponsorship") ||
+                               pathname.startsWith("/gallery");
+  
+  const isCoachingSection = pathname.startsWith("/coaching");
 
   const getInitial = () => {
     return user?.name.charAt(0).toUpperCase() || "U";
@@ -33,9 +45,11 @@ export function Sidebar() {
 
   return (
     <aside className="w-56 h-screen sticky top-0 border-r border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-neutral-950/60 flex flex-col p-4 gap-2 overflow-y-auto">
-      <div className="mb-4 mt-2 font-bold text-lg tracking-tight">{t('sidebar.appName')}</div>
+      <div className="mb-4 mt-2 font-bold text-lg tracking-tight cursor-pointer" onClick={() => router.push('/dashboard')}>
+        {t('sidebar.appName')}
+      </div>
       
-      {user?.role === "event-hoster" && (
+      {isTournamentSection && user?.role === "admin" && (
         <Button 
           onClick={() => router.push('/tournaments/create')} 
           className="w-full mb-4"
@@ -47,76 +61,95 @@ export function Sidebar() {
       )}
       
       <nav className="flex flex-col gap-1 flex-1">
-        <Link 
-          href="/dashboard" 
-          className={cn(
-            "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
-            (pathname === "/dashboard" || pathname.startsWith("/tournaments")) && "bg-neutral-100 dark:bg-neutral-800 font-medium"
-          )}
-        >
-          {t('sidebar.tournaments')}
-        </Link>
-        <Link 
-          href="/forms" 
-          className={cn(
-            "px-3 py-2 rounded-md hover:bg-neutral-100 transition flex items-center gap-2",
-            pathname.startsWith("/forms") && "bg-neutral-100 font-medium"
-          )}
-        >
-          <FileText className="h-4 w-4" />
-          {t('sidebar.forms')}
-        </Link>
-        {user?.role === "event-hoster" && (
-          <Link 
-            href="/sponsorship" 
-            className={cn(
-              "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
-              pathname === "/sponsorship" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+        {isTournamentSection && (
+          <>
+            <Link 
+              href="/tournaments" 
+              className={cn(
+                "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
+                pathname.startsWith("/tournaments") && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+              )}
+            >
+              {t('sidebar.tournaments')}
+            </Link>
+            <Link 
+              href="/forms" 
+              className={cn(
+                "px-3 py-2 rounded-md hover:bg-neutral-100 transition flex items-center gap-2",
+                pathname.startsWith("/forms") && "bg-neutral-100 font-medium"
+              )}
+            >
+              <FileText className="h-4 w-4" />
+              {t('sidebar.forms')}
+            </Link>
+            {user?.role === "admin" && (
+              <Link 
+                href="/sponsorship" 
+                className={cn(
+                  "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
+                  pathname === "/sponsorship" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+                )}
+              >
+                {t('sidebar.sponsorships')}
+              </Link>
             )}
-          >
-            {t('sidebar.sponsorships')}
-          </Link>
-        )}
-        <Link 
-          href="/gallery" 
-          className={cn(
-            "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
-            pathname === "/gallery" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
-          )}
-        >
-          {t('sidebar.gallery')}
-        </Link>
-        {user?.role !== "event-hoster" && (
-          <Link 
-            href="/voting" 
-            className={cn(
-              "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
-              pathname === "/voting" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+            <Link 
+              href="/gallery" 
+              className={cn(
+                "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
+                pathname === "/gallery" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+              )}
+            >
+              {t('sidebar.gallery')}
+            </Link>
+            {user?.role !== "admin" && (
+              <Link 
+                href="/voting" 
+                className={cn(
+                  "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
+                  pathname === "/voting" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+                )}
+              >
+                Fan Voting
+              </Link>
             )}
-          >
-            Fan Voting
-          </Link>
-        )}
-        {user?.role === "user" && (
-          <Link 
-            href="/fixtures" 
-            className={cn(
-              "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
-              pathname === "/fixtures" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+            {user?.role === "user" && (
+              <Link 
+                href="/fixtures" 
+                className={cn(
+                  "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
+                  pathname === "/fixtures" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+                )}
+              >
+                {t('sidebar.myFixtures')}
+              </Link>
             )}
-          >
-            {t('sidebar.myFixtures')}
-          </Link>
+            <Link 
+              href="/past-tournaments" 
+              className={cn(
+                "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
+                pathname === "/past-tournaments" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+              )}
+            >
+              {t('sidebar.pastTournaments')}
+            </Link>
+          </>
         )}
-        <Link 
-          href="/past-tournaments" 
-          className={cn(
-            "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
-            pathname === "/past-tournaments" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
-          )}
-        >
-          {t('sidebar.pastTournaments')}
-        </Link>
+
+        {isCoachingSection && (
+          <>
+            <Link 
+              href="/coaching" 
+              className={cn(
+                "px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
+                pathname.startsWith("/coaching") && "bg-neutral-100 dark:bg-neutral-800 font-medium"
+              )}
+            >
+              {t('sidebar.coaching')}
+            </Link>
+            {/* Add more coaching-related links here */}
+          </>
+        )}
       </nav>
       
       <div className="border-t border-neutral-200 dark:border-neutral-800 pt-4">

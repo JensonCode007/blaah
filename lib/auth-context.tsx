@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 interface User {
   email: string;
   name: string;
-  role: "user" | "event-hoster";
+  role: "user" | "admin";
 }
 
 interface AuthContextType {
@@ -27,12 +27,12 @@ const TEST_USER: User = {
   role: "user"
 };
 
-const EVENT_HOSTER_EMAIL = "hoster@example.com";
-const EVENT_HOSTER_PASSWORD = "hoster123";
-const EVENT_HOSTER_USER: User = {
-  email: EVENT_HOSTER_EMAIL,
-  name: "Event Hoster",
-  role: "event-hoster"
+const ADMIN_EMAIL = "admin@example.com";
+const ADMIN_PASSWORD = "admin123";
+const ADMIN_USER: User = {
+  email: ADMIN_EMAIL,
+  name: "Admin",
+  role: "admin"
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -60,8 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     if (email === TEST_EMAIL && password === TEST_PASSWORD) {
       currentUser = TEST_USER;
-    } else if (email === EVENT_HOSTER_EMAIL && password === EVENT_HOSTER_PASSWORD) {
-      currentUser = EVENT_HOSTER_USER;
+    } else if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      currentUser = ADMIN_USER;
     }
     
     if (currentUser) {
@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(currentUser);
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("user", JSON.stringify(currentUser));
+      router.push("/role-selection");
       return true;
     }
     return false;

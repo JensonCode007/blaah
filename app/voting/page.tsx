@@ -37,9 +37,9 @@ export default function MatchVotingPage() {
   const [isVoting, setIsVoting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  // Redirect event hosters away from voting page
+  // Redirect admins away from voting page
   useEffect(() => {
-    if (user?.role === "event-hoster") {
+    if (user?.role === "admin") {
       router.push("/dashboard");
     }
   }, [user, router]);

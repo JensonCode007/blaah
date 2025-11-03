@@ -1,230 +1,164 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, Trophy, ArrowRight, CheckCircle } from "lucide-react";
+import { Trophy, Users, Settings, User, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
-import { getAllTournaments } from "@/lib/api/tournaments";
-import { Tournament } from "@/types/tournaments";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
-import { CompleteTournamentDialog } from "@/components/tournaments/CompleteTournamentDialog";
-import { Toaster } from "@/components/ui/sonner";
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'UPCOMING': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-    case 'ONGOING': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-    case 'COMPLETED': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    case 'CANCELLED': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-    default: return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
-  }
-};
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
-  const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
-  const [selectedTournamentName, setSelectedTournamentName] = useState("");
-  
-  const isEventHoster = user?.role === "event-hoster";
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
-  // Translation helper for tournament types
-  const getTypeLabel = (type: string) => {
-    const typeMap: { [key: string]: string } = {
-      'SINGLE_ELIMINATION': t('dashboard.type.singleElimination'),
-      'DOUBLE_ELIMINATION': t('dashboard.type.doubleElimination'),
-      'ROUND_ROBIN': t('dashboard.type.roundRobin'),
-      'SWISS': t('dashboard.type.swiss'),
-      'LEAGUE': t('dashboard.type.league'),
-    };
-    return typeMap[type] || type;
+  const getInitial = () => {
+    return user?.name.charAt(0).toUpperCase() || "U";
   };
 
-  // Translation helper for status
-  const getStatusLabel = (status: string) => {
-    const statusMap: { [key: string]: string } = {
-      'UPCOMING': t('dashboard.status.upcoming'),
-      'ONGOING': t('dashboard.status.ongoing'),
-      'COMPLETED': t('dashboard.status.completed'),
-      'CANCELLED': t('dashboard.status.cancelled'),
-    };
-    return statusMap[status] || status;
-  };
-
-  useEffect(() => {
-    loadTournaments();
-  }, []);
-
-  const loadTournaments = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllTournaments();
-      
-      if (isEventHoster) {
-        setTournaments(response.data);
-      } else {
-        const registeredTournaments = response.data.filter(t => 
-          t.status === 'UPCOMING' || t.status === 'ONGOING'
-        );
-        setTournaments(registeredTournaments);
-      }
-    } catch (error) {
-      console.error('Error loading tournaments:', error);
-    } finally {
-      setLoading(false);
+  const managementCards = [
+    {
+      title: "Tournament Management",
+      description: "Create, manage and track all tournament activities",
+      icon: Trophy,
+      href: "/tournaments",
+      gradient: "from-blue-500 to-purple-600",
+      hoverGradient: "hover:from-blue-600 hover:to-purple-700"
+    },
+    {
+      title: "Coaching Management",
+      description: "Manage coaching sessions, schedules and resources",
+      icon: Users,
+      href: "/coaching",
+      gradient: "from-green-500 to-teal-600",
+      hoverGradient: "hover:from-green-600 hover:to-teal-700"
     }
-  };
-
-  const handleCompleteTournament = (tournamentId: string, tournamentName: string) => {
-    setSelectedTournamentId(tournamentId);
-    setSelectedTournamentName(tournamentName);
-    setCompleteDialogOpen(true);
-  };
-
-  const handleTournamentCompleted = () => {
-    // Refresh tournament list after completion
-    loadTournaments();
-    setCompleteDialogOpen(false);
-    setSelectedTournamentId(null);
-    setSelectedTournamentName("");
-  };
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
-          <p className="text-neutral-600 mt-1">{t('dashboard.loading')}</p>
-        </div>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
+  ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
-        <p className="text-neutral-600 mt-1">
-          {tournaments.length > 0 
-            ? t('dashboard.tournamentsAvailable', { count: tournaments.length })
-            : t('dashboard.noTournaments')}
-        </p>
-      </div>
-      
-      {tournaments.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Trophy className="h-16 w-16 text-neutral-400 dark:text-neutral-600 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Tournaments Yet</h3>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">Create your first tournament to get started</p>
-            <Link 
-              href="/tournaments/create"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              {t('dashboard.createTournament')}
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tournaments.map((tournament) => {
-            const canComplete = isEventHoster && (tournament.status === 'ONGOING' || tournament.status === 'UPCOMING');
+    <div className="min-h-screen flex flex-col">
+      {/* Top Bar */}
+      <div className="border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Y Ultimate
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="px-3 py-1">
+              {user?.role === "admin" ? "Admin" : "User"}
+            </Badge>
             
-            const cardContent = (
-              <motion.div 
-                whileHover={{ y: -2, scale: 1.02 }} 
-                whileTap={{ scale: 0.99 }} 
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <Card className="rounded-2xl h-full border-neutral-200/70 dark:border-neutral-800 overflow-hidden transition-all duration-200 group-hover:shadow-lg dark:group-hover:shadow-neutral-900/50">
-                  <CardHeader className="bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-800/50 group-hover:from-neutral-50 group-hover:to-white dark:group-hover:from-neutral-800/50 dark:group-hover:to-neutral-900">
-                    <div className="flex items-start justify-between mb-2">
-                      <CardTitle className="text-lg line-clamp-1">{tournament.name}</CardTitle>
-                      <Badge className={getStatusColor(tournament.status)} variant="secondary">
-                        {getStatusLabel(tournament.status)}
-                      </Badge>
-                    </div>
-                    <CardDescription className="line-clamp-2">
-                      {tournament.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-3">
-                    <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
-                      <Trophy className="h-4 w-4 mr-2" />
-                      {getTypeLabel(tournament.type)}
-                    </div>
-                    <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {new Date(tournament.startDate).toLocaleDateString()} - {new Date(tournament.endDate).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      {tournament.location}
-                    </div>
-                    <div className="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
-                      <Users className="h-4 w-4 mr-2" />
-                      {tournament.currentParticipants}/{tournament.maxParticipants} {t('dashboard.participants')}
-                    </div>
-                    
-                    {canComplete ? (
-                      <div className="pt-2 flex flex-col gap-2">
-                        <Button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleCompleteTournament(tournament.id.toString(), tournament.name);
-                          }}
-                          variant="default"
-                          size="sm"
-                          className="w-full"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          {t('dashboard.completeTournament')}
-                        </Button>
-                        <div className="flex items-center text-primary font-medium text-sm group-hover:translate-x-1 transition-transform">
-                          {t('dashboard.viewDetails')}
-                          <ArrowRight className="h-4 w-4 ml-1" />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="pt-2 flex items-center text-primary font-medium text-sm group-hover:translate-x-1 transition-transform">
-                        {t('dashboard.viewDetails')}
-                        <ArrowRight className="h-4 w-4 ml-1" />
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-            
-            return (
-              <Link key={tournament.id} href={`/tournaments/${tournament.id}`} className="block group">
-                {cardContent}
-              </Link>
-            );
-          })}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                    {getInitial()}
+                  </div>
+                  <div className="text-left">
+                    <div className="text-sm font-medium">{user?.name}</div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">{user?.email}</div>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => router.push("/profile")}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Manage Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => router.push("/settings")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  onClick={logout}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      )}
-      
-      <CompleteTournamentDialog
-        open={completeDialogOpen}
-        onClose={() => setCompleteDialogOpen(false)}
-        tournamentId={selectedTournamentId || ""}
-        tournamentName={selectedTournamentName}
-        onSuccess={handleTournamentCompleted}
-      />
-      
-      <Toaster />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 max-w-7xl mx-auto px-6 py-12 w-full">
+        <div className="space-y-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold mb-3">Welcome back, {user?.name}!</h2>
+            <p className="text-neutral-600 dark:text-neutral-400 text-lg">
+              Select a management area to get started
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-12">
+        {managementCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <motion.div
+              key={card.title}
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Card 
+                className="cursor-pointer h-full border-2 hover:shadow-xl transition-all duration-200 overflow-hidden group"
+                onClick={() => router.push(card.href)}
+              >
+                <CardHeader className="pb-4">
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${card.gradient} ${card.hoverGradient} flex items-center justify-center mb-4 transition-all duration-200`}>
+                    <Icon className="h-8 w-8 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl">{card.title}</CardTitle>
+                  <CardDescription className="text-base mt-2">
+                    {card.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center text-primary font-medium group-hover:translate-x-2 transition-transform">
+                    Get Started
+                    <svg
+                      className="ml-2 h-5 w-5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          );
+        })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
