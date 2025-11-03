@@ -4,18 +4,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Bell, Lock, Moon, Globe, Shield, Eye } from "lucide-react";
+import { Bell, Lock, Moon, Globe, Shield, Eye, Sun } from "lucide-react";
+import { useTheme } from "@/lib/theme-context";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function SettingsPage() {
+  const { theme, actualTheme, toggleTheme } = useTheme();
   const [settings, setSettings] = useState({
     emailNotifications: true,
     pushNotifications: false,
     tournamentUpdates: true,
-    darkMode: false,
     language: "English",
     twoFactor: false,
     publicProfile: true,
   });
+
+  const handleThemeToggle = () => {
+    toggleTheme();
+    const newTheme = actualTheme === "light" ? "dark" : "light";
+    toast.success(
+      newTheme === "dark" ? "Dark mode enabled 🌙" : "Light mode enabled ☀️",
+      { description: "Theme changed successfully" }
+    );
+  };
 
   const handleSave = () => {
     console.log("Saving settings:", settings);
@@ -25,7 +37,7 @@ export default function SettingsPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-neutral-600 mt-1">Manage your account preferences and security settings.</p>
+        <p className="text-neutral-600 dark:text-neutral-400 mt-1">Manage your account preferences and security settings.</p>
       </div>
 
       <Card>
@@ -42,12 +54,12 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Email Notifications</Label>
-              <p className="text-sm text-neutral-500">Receive email updates about your account</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Receive email updates about your account</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, emailNotifications: !settings.emailNotifications })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.emailNotifications ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.emailNotifications ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -61,12 +73,12 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Push Notifications</Label>
-              <p className="text-sm text-neutral-500">Receive push notifications on your device</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Receive push notifications on your device</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, pushNotifications: !settings.pushNotifications })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.pushNotifications ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.pushNotifications ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -80,12 +92,12 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Tournament Updates</Label>
-              <p className="text-sm text-neutral-500">Get notified about tournament changes</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Get notified about tournament changes</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, tournamentUpdates: !settings.tournamentUpdates })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.tournamentUpdates ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.tournamentUpdates ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -112,17 +124,17 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Dark Mode</Label>
-              <p className="text-sm text-neutral-500">Switch to dark theme</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Switch to dark theme</p>
             </div>
             <button
-              onClick={() => setSettings({ ...settings, darkMode: !settings.darkMode })}
+              onClick={handleThemeToggle}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.darkMode ? 'bg-blue-600' : 'bg-neutral-200'
+                actualTheme === 'dark' ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.darkMode ? 'translate-x-6' : 'translate-x-1'
+                  actualTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -134,9 +146,9 @@ export default function SettingsPage() {
                 <Globe className="h-4 w-4" />
                 Language
               </Label>
-              <p className="text-sm text-neutral-500">Select your preferred language</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Select your preferred language</p>
             </div>
-            <select className="rounded-md border border-neutral-200 px-3 py-1.5 text-sm">
+            <select className="rounded-md border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800 px-3 py-1.5 text-sm">
               <option>English</option>
               <option>Spanish</option>
               <option>French</option>
@@ -163,12 +175,12 @@ export default function SettingsPage() {
                 <Lock className="h-4 w-4" />
                 Two-Factor Authentication
               </Label>
-              <p className="text-sm text-neutral-500">Add an extra layer of security</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Add an extra layer of security</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, twoFactor: !settings.twoFactor })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.twoFactor ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.twoFactor ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -185,12 +197,12 @@ export default function SettingsPage() {
                 <Eye className="h-4 w-4" />
                 Public Profile
               </Label>
-              <p className="text-sm text-neutral-500">Make your profile visible to others</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Make your profile visible to others</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, publicProfile: !settings.publicProfile })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.publicProfile ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.publicProfile ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -218,7 +230,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Delete Account</Label>
-              <p className="text-sm text-neutral-500">Permanently delete your account and all data</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Permanently delete your account and all data</p>
             </div>
             <Button variant="destructive" size="sm">
               Delete Account
@@ -231,6 +243,7 @@ export default function SettingsPage() {
         <Button variant="outline">Cancel</Button>
         <Button onClick={handleSave}>Save Changes</Button>
       </div>
+      <Toaster />
     </div>
   );
 }
