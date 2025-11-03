@@ -57,7 +57,8 @@ export default function SponsorshipPage() {
     if (storedSponsors) setSponsors(JSON.parse(storedSponsors));
   }, []);
 
-  const isEventHoster = user?.role === "event-hoster";
+  const isAdmin = user?.role === "admin";
+  const isEventHoster = user?.role === "admin" || user?.role === "event_hoster";
 
   const handleSponsorSubmit = (submission: SponsorSubmission) => {
     const newSponsor: Sponsor = {

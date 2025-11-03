@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function EventHosterRegistrationPage() {
+export default function AdminRegistrationPage() {
   const [formData, setFormData] = useState({
     organizationName: "",
     contactName: "",
@@ -49,7 +49,7 @@ export default function EventHosterRegistrationPage() {
     }
 
     // Add registration logic here
-    console.log("Event Hoster registration:", formData);
+    console.log("Admin registration:", formData);
     
     setSuccess(true);
     setTimeout(() => {
@@ -61,7 +61,7 @@ export default function EventHosterRegistrationPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-white p-4 py-8">
       <Card className="w-full max-w-3xl">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Register as Event Hoster</CardTitle>
+          <CardTitle className="text-2xl font-bold">Register as Admin</CardTitle>
           <CardDescription>Create an account to organize tournaments and events</CardDescription>
         </CardHeader>
         <CardContent>
@@ -283,7 +283,7 @@ export default function EventHosterRegistrationPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={success}>
-              {success ? "Redirecting..." : "Create Event Hoster Account"}
+              {success ? "Redirecting..." : "Create Admin Account"}
             </Button>
           </form>
 

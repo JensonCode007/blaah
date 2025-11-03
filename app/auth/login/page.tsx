@@ -77,7 +77,7 @@ export default function LoginPage() {
               <br />
               <strong>Regular User:</strong> test@example.com / test123
               <br />
-              <strong>Event Hoster:</strong> hoster@example.com / hoster123
+              <strong>Admin:</strong> admin@example.com / admin123
             </div>
 
             <Button type="submit" className="w-full">
@@ -93,9 +93,9 @@ export default function LoginPage() {
                   Register as User
                 </Button>
               </Link>
-              <Link href="/auth/register/event-hoster">
+              <Link href="/auth/register/admin">
                 <Button variant="outline" className="w-full">
-                  Register as Event Hoster
+                  Register as Admin
                 </Button>
               </Link>
             </div>

@@ -1,159 +1,164 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Trophy, ArrowRight } from "lucide-react";
+import { Trophy, Users, Settings, User, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
-import { getAllTournaments } from "@/lib/api/tournaments";
-import { Tournament } from "@/types/tournaments";
 import { useAuth } from "@/lib/auth-context";
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'UPCOMING': return 'bg-blue-100 text-blue-800';
-    case 'ONGOING': return 'bg-green-100 text-green-800';
-    case 'COMPLETED': return 'bg-gray-100 text-gray-800';
-    case 'CANCELLED': return 'bg-red-100 text-red-800';
-    default: return 'bg-yellow-100 text-yellow-800';
-  }
-};
-
-const getTypeLabel = (type: string) => {
-  switch (type) {
-    case 'SINGLE_ELIMINATION': return 'Single Elimination';
-    case 'DOUBLE_ELIMINATION': return 'Double Elimination';
-    case 'ROUND_ROBIN': return 'Round Robin';
-    case 'SWISS': return 'Swiss';
-    case 'LEAGUE': return 'League';
-    default: return type;
-  }
-};
+import { useTranslation } from "react-i18next";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  const isEventHoster = user?.role === "event-hoster";
+  const { t } = useTranslation();
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
-  useEffect(() => {
-    loadTournaments();
-  }, []);
-
-  const loadTournaments = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllTournaments();
-      
-      // For normal users, show only registered tournaments (mock - you can add registration logic)
-      // For event hosters, show all tournaments
-      if (isEventHoster) {
-        setTournaments(response.data);
-      } else {
-        // Mock registered tournaments - filter to show only tournaments with UPCOMING or ONGOING status
-        // In real implementation, this would check user's registration status
-        const registeredTournaments = response.data.filter(t => 
-          t.status === 'UPCOMING' || t.status === 'ONGOING'
-        );
-        setTournaments(registeredTournaments);
-      }
-    } catch (error) {
-      console.error('Error loading tournaments:', error);
-    } finally {
-      setLoading(false);
-    }
+  const getInitial = () => {
+    return user?.name.charAt(0).toUpperCase() || "U";
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-neutral-600 mt-1">Loading tournaments...</p>
-        </div>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
+  const managementCards = [
+    {
+      title: "Tournament Management",
+      description: "Create, manage and track all tournament activities",
+      icon: Trophy,
+      href: "/tournaments",
+      gradient: "from-blue-500 to-purple-600",
+      hoverGradient: "hover:from-blue-600 hover:to-purple-700"
+    },
+    {
+      title: "Coaching Management",
+      description: "Manage coaching sessions, schedules and resources",
+      icon: Users,
+      href: "/coaching",
+      gradient: "from-green-500 to-teal-600",
+      hoverGradient: "hover:from-green-600 hover:to-teal-700"
+    }
+  ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Tournaments</h1>
-        <p className="text-neutral-600 mt-1">
-          {tournaments.length > 0 
-            ? `${tournaments.length} tournament${tournaments.length > 1 ? 's' : ''} available` 
-            : 'No tournaments created yet'}
-        </p>
-      </div>
-      
-      {tournaments.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Trophy className="h-16 w-16 text-neutral-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Tournaments Yet</h3>
-            <p className="text-neutral-600 mb-6">Create your first tournament to get started</p>
-            <Link 
-              href="/tournaments/create"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Create Tournament
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tournaments.map((tournament) => (
-            <Link key={tournament.id} href={`/tournaments/${tournament.id}`} className="block group">
-              <motion.div 
-                whileHover={{ y: -2, scale: 1.02 }} 
-                whileTap={{ scale: 0.99 }} 
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <Card className="rounded-2xl h-full border-neutral-200/70 overflow-hidden transition-all duration-200 group-hover:shadow-lg">
-                  <CardHeader className="bg-gradient-to-br from-white to-neutral-50 group-hover:from-neutral-50 group-hover:to-white">
-                    <div className="flex items-start justify-between mb-2">
-                      <CardTitle className="text-lg line-clamp-1">{tournament.name}</CardTitle>
-                      <Badge className={getStatusColor(tournament.status)} variant="secondary">
-                        {tournament.status}
-                      </Badge>
-                    </div>
-                    <CardDescription className="line-clamp-2">
-                      {tournament.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-4 space-y-3">
-                    <div className="flex items-center text-sm text-neutral-600">
-                      <Trophy className="h-4 w-4 mr-2" />
-                      {getTypeLabel(tournament.type)}
-                    </div>
-                    <div className="flex items-center text-sm text-neutral-600">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {new Date(tournament.startDate).toLocaleDateString()} - {new Date(tournament.endDate).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center text-sm text-neutral-600">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      {tournament.location}
-                    </div>
-                    <div className="flex items-center text-sm text-neutral-600">
-                      <Users className="h-4 w-4 mr-2" />
-                      {tournament.currentParticipants}/{tournament.maxParticipants} participants
-                    </div>
-                    <div className="pt-2 flex items-center text-primary font-medium text-sm group-hover:translate-x-1 transition-transform">
-                      View Details
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Link>
-          ))}
+    <div className="min-h-screen flex flex-col">
+      {/* Top Bar */}
+      <div className="border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Y Ultimate
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="px-3 py-1">
+              {user?.role === "admin" ? "Admin" : "User"}
+            </Badge>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition cursor-pointer">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                    {getInitial()}
+                  </div>
+                  <div className="text-left">
+                    <div className="text-sm font-medium">{user?.name}</div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">{user?.email}</div>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => router.push("/profile")}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Manage Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => router.push("/settings")}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  onClick={logout}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 max-w-7xl mx-auto px-6 py-12 w-full">
+        <div className="space-y-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold mb-3">Welcome back, {user?.name}!</h2>
+            <p className="text-neutral-600 dark:text-neutral-400 text-lg">
+              Select a management area to get started
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-12">
+        {managementCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <motion.div
+              key={card.title}
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <Card 
+                className="cursor-pointer h-full border-2 hover:shadow-xl transition-all duration-200 overflow-hidden group"
+                onClick={() => router.push(card.href)}
+              >
+                <CardHeader className="pb-4">
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${card.gradient} ${card.hoverGradient} flex items-center justify-center mb-4 transition-all duration-200`}>
+                    <Icon className="h-8 w-8 text-white" />
+                  </div>
+                  <CardTitle className="text-2xl">{card.title}</CardTitle>
+                  <CardDescription className="text-base mt-2">
+                    {card.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center text-primary font-medium group-hover:translate-x-2 transition-transform">
+                    Get Started
+                    <svg
+                      className="ml-2 h-5 w-5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          );
+        })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
