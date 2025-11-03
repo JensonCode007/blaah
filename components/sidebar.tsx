@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, User, Settings, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const { isAuthenticated, user, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -32,6 +34,8 @@ export function Sidebar() {
   return (
     <aside className="w-56 h-screen sticky top-0 border-r border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-neutral-950/60 flex flex-col p-4 gap-2 overflow-y-auto">
       <div className="mb-4 mt-2 font-bold text-lg tracking-tight">Y-Ultimate</div>
+    <aside className="w-56 h-screen sticky top-0 border-r border-neutral-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 flex flex-col p-4 gap-2 overflow-y-auto">
+      <div className="mb-4 mt-2 font-bold text-lg tracking-tight">{t('sidebar.appName')}</div>
       
       {user?.role === "event-hoster" && (
         <Button 
@@ -40,7 +44,7 @@ export function Sidebar() {
           size="sm"
         >
           <Plus className="mr-2 h-4 w-4" />
-          New Tournament
+          {t('sidebar.newTournament')}
         </Button>
       )}
       
@@ -52,7 +56,7 @@ export function Sidebar() {
             (pathname === "/dashboard" || pathname.startsWith("/tournaments")) && "bg-neutral-100 dark:bg-neutral-800 font-medium"
           )}
         >
-          Tournaments
+          {t('sidebar.tournaments')}
         </Link>
         {user?.role === "event-hoster" && (
           <Link 
@@ -62,7 +66,7 @@ export function Sidebar() {
               pathname === "/sponsorship" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
             )}
           >
-            Sponsorships
+            {t('sidebar.sponsorships')}
           </Link>
         )}
         <Link 
@@ -72,7 +76,7 @@ export function Sidebar() {
             pathname === "/gallery" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
           )}
         >
-          Gallery
+          {t('sidebar.gallery')}
         </Link>
         <Link 
           href="/voting" 
@@ -91,7 +95,7 @@ export function Sidebar() {
               pathname === "/fixtures" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
             )}
           >
-            My Fixtures
+            {t('sidebar.myFixtures')}
           </Link>
         )}
         <Link 
@@ -101,7 +105,7 @@ export function Sidebar() {
             pathname === "/past-tournaments" && "bg-neutral-100 dark:bg-neutral-800 font-medium"
           )}
         >
-          Past Tournaments
+          {t('sidebar.pastTournaments')}
         </Link>
       </nav>
       
@@ -119,21 +123,21 @@ export function Sidebar() {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('sidebar.myAccount')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="cursor-pointer"
               onClick={() => router.push("/profile")}
             >
               <User className="mr-2 h-4 w-4" />
-              Manage Profile
+              {t('sidebar.manageProfile')}
             </DropdownMenuItem>
             <DropdownMenuItem 
               className="cursor-pointer"
               onClick={() => router.push("/settings")}
             >
               <Settings className="mr-2 h-4 w-4" />
-              Settings
+              {t('sidebar.settings')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
@@ -141,7 +145,7 @@ export function Sidebar() {
               onClick={logout}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              {t('sidebar.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

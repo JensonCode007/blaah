@@ -6,6 +6,9 @@ import { AuthProvider } from "../lib/auth-context";
 import { ThemeProvider } from "../lib/theme-context";
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { ThemeScript } from "@/components/theme-script";
+import { LanguageProvider } from "@/lib/language-context";
+import { LayoutWrapper } from "@/components/layout-wrapper";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +32,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <LayoutWrapper>{children}</LayoutWrapper>
           </AuthProvider>
         </ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+            <Toaster position="top-right" richColors />
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
