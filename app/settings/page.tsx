@@ -5,9 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Bell, Lock, Moon, Globe, Shield, Eye, Languages } from "lucide-react";
+import { useTheme } from "@/lib/theme-context";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import {
   Select,
   SelectContent,
@@ -18,16 +20,27 @@ import {
 
 export default function SettingsPage() {
   const { t } = useTranslation();
+  const { theme, actualTheme, toggleTheme } = useTheme();
   const { language, changeLanguage, languages } = useLanguage();
   
   const [settings, setSettings] = useState({
     emailNotifications: true,
     pushNotifications: false,
     tournamentUpdates: true,
+    language: "English",
     darkMode: false,
     twoFactor: false,
     publicProfile: true,
   });
+
+  const handleThemeToggle = () => {
+    toggleTheme();
+    const newTheme = actualTheme === "light" ? "dark" : "light";
+    toast.success(
+      newTheme === "dark" ? "Dark mode enabled 🌙" : "Light mode enabled ☀️",
+      { description: "Theme changed successfully" }
+    );
+  };
 
   const handleSave = () => {
     // Simulate saving with a small delay
@@ -45,7 +58,7 @@ export default function SettingsPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
-        <p className="text-neutral-600 mt-1">{t('settings.description')}</p>
+        <p className="text-neutral-600 dark:text-neutral-400 mt-1">{t('settings.description')}</p>
       </div>
 
       <Card>
@@ -62,12 +75,12 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>{t('settings.notifications.email')}</Label>
-              <p className="text-sm text-neutral-500">{t('settings.notifications.emailDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.notifications.emailDesc')}</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, emailNotifications: !settings.emailNotifications })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.emailNotifications ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.emailNotifications ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -81,12 +94,12 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>{t('settings.notifications.push')}</Label>
-              <p className="text-sm text-neutral-500">{t('settings.notifications.pushDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.notifications.pushDesc')}</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, pushNotifications: !settings.pushNotifications })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.pushNotifications ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.pushNotifications ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -100,12 +113,12 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>{t('settings.notifications.tournament')}</Label>
-              <p className="text-sm text-neutral-500">{t('settings.notifications.tournamentDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.notifications.tournamentDesc')}</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, tournamentUpdates: !settings.tournamentUpdates })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.tournamentUpdates ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.tournamentUpdates ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -132,17 +145,17 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>{t('settings.appearance.darkMode')}</Label>
-              <p className="text-sm text-neutral-500">{t('settings.appearance.darkModeDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.appearance.darkModeDesc')}</p>
             </div>
             <button
-              onClick={() => setSettings({ ...settings, darkMode: !settings.darkMode })}
+              onClick={handleThemeToggle}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.darkMode ? 'bg-blue-600' : 'bg-neutral-200'
+                actualTheme === 'dark' ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.darkMode ? 'translate-x-6' : 'translate-x-1'
+                  actualTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -154,7 +167,7 @@ export default function SettingsPage() {
                 <Languages className="h-4 w-4" />
                 {t('settings.appearance.language')}
               </Label>
-              <p className="text-sm text-neutral-500">{t('settings.appearance.languageDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.appearance.languageDesc')}</p>
             </div>
             <Select value={language} onValueChange={changeLanguage}>
               <SelectTrigger className="w-[200px]">
@@ -189,12 +202,12 @@ export default function SettingsPage() {
                 <Lock className="h-4 w-4" />
                 {t('settings.security.twoFactor')}
               </Label>
-              <p className="text-sm text-neutral-500">{t('settings.security.twoFactorDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.security.twoFactorDesc')}</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, twoFactor: !settings.twoFactor })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.twoFactor ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.twoFactor ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -211,12 +224,12 @@ export default function SettingsPage() {
                 <Eye className="h-4 w-4" />
                 {t('settings.security.publicProfile')}
               </Label>
-              <p className="text-sm text-neutral-500">{t('settings.security.publicProfileDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.security.publicProfileDesc')}</p>
             </div>
             <button
               onClick={() => setSettings({ ...settings, publicProfile: !settings.publicProfile })}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                settings.publicProfile ? 'bg-blue-600' : 'bg-neutral-200'
+                settings.publicProfile ? 'bg-blue-600' : 'bg-neutral-200 dark:bg-neutral-700'
               }`}
             >
               <span
@@ -244,7 +257,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>{t('settings.danger.deleteAccount')}</Label>
-              <p className="text-sm text-neutral-500">{t('settings.danger.deleteAccountDesc')}</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('settings.danger.deleteAccountDesc')}</p>
             </div>
             <Button variant="destructive" size="sm">
               {t('settings.danger.deleteButton')}
